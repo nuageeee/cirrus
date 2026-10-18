@@ -1,5 +1,7 @@
 const { contextBridge, ipcRenderer } = require("electron");
 
-contextBridge.exposeInMainWorld('versions', {
-    ping: () => ipcRenderer.invoke('ping')
+contextBridge.exposeInMainWorld('files', {
+    open: () => ipcRenderer.invoke('file:open'),
+    save: (text) => ipcRenderer.invoke('file:save', text),
+    saveAs: (text) => ipcRenderer.invoke('file:save-as', text),
 })
