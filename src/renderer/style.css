@@ -1,0 +1,9 @@
+html, body {
+  margin: 0;          /* le navigateur met 8px de marge par défaut */
+  height: 100%;
+}
+
+#editor,
+#editor .cm-editor {
+  height: 100%;       /* la div ET l'éditeur prennent toute la hauteur */
+}

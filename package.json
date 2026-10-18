@@ -15,7 +15,9 @@
   "type": "commonjs",
   "main": "src/main/main.js",
   "scripts": {
-    "start": "electron .",
+    "build": "esbuild src/renderer/renderer.js --bundle --outfile=dist/renderer.js --sourcemap",
+    "watch": "esbuild src/renderer/renderer.js --bundle --outfile=dist/renderer.js --sourcemap --watch",
+    "start": "npm run build && electron .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
