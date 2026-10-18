@@ -30,8 +30,13 @@ ipcMain.handle('file:open', async (event) => {
 
     const filePath = filePaths[0];
     const text = await fs.readFile(filePath, 'utf8');
+
+    if (text.includes('\0')) {
+        throw new error('This file is a binary file : Cirrus cant open.')
+    }
+
     currentPath = filePath;
-    return { ...fileInfo(filePath), text };
+    return { ...fileInfo(filePath), text, notUtf8: text.includes('\uFFFD')};
 });
 
 ipcMain.handle('file:save', async (event, text) => {
@@ -50,8 +55,8 @@ ipcMain.handle('file:save-as', async (event, text) => {
     return saveAs(win, text);
 });
 
-ipcMain.handle('file:modified', (event, modified) => {
-    documentModified = modified = true;
+ipcMain.on('file:modified', (event, modified) => {
+    documentModified = modified === true;
 });
 
 ipcMain.on('window:close-confirmed', (event) => {
@@ -60,40 +65,40 @@ ipcMain.on('window:close-confirmed', (event) => {
 })
 
 function createMainWindow() {
-  const win = new BrowserWindow({
-    width: 900,
-    height: 900,
-    webPreferences: {
-      preload: path.join(__dirname, '../preload/preload.js'),
-    },
-  });
-  win.loadFile(path.join(__dirname, '../renderer/index.html'));
-  
-  win.on('close', (event) => {
-    if (closeConfirmed || !documentModified) return;
-
-    event.preventDefault;
-
-    const choice = dialog.showMessageBoxSync(win, {
-        type: 'warning',
-        buttons: ['Save', "Don't save", 'annuler'],
-        defaultId: 0,
-        cancelId: 2,
-        message: 'Save modifications?',
-        detail: 'Else, there as going to be losts.'
+    const win = new BrowserWindow({
+        width: 900,
+        height: 900,
+        webPreferences: {
+            preload: path.join(__dirname, '../preload/preload.js'),
+        },
     });
+    win.loadFile(path.join(__dirname, '../renderer/index.html'));
 
-    if (choice == 0) {
-        win.webContents.send('windows:save-and-close');
-    } else if (choice == 1) {
-        closeConfirmed = true;
-        win.close();
-    }
-  })
+    win.on('close', (event) => {
+        if (closeConfirmed || !documentModified) return;
+
+        event.preventDefault();
+
+        const choice = dialog.showMessageBoxSync(win, {
+            type: 'warning',
+            buttons: ['Save', "Don't save", 'annuler'],
+            defaultId: 0,
+            cancelId: 2,
+            message: 'Save modifications?',
+            detail: 'Else, there as going to be losts.'
+        });
+
+        if (choice == 0) {
+            win.webContents.send('windows:save-and-close');
+        } else if (choice == 1) {
+            closeConfirmed = true;
+            win.close();
+        }
+    })
 }
 
 app.whenReady().then(createMainWindow);
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit();
+    if (process.platform !== 'darwin') app.quit();
 });

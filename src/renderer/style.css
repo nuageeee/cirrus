@@ -1,9 +1,36 @@
 html, body {
-  margin: 0;          /* le navigateur met 8px de marge par défaut */
+  margin: 0;
   height: 100%;
 }
 
-#editor,
+/* La page = une colonne : l'éditeur prend toute la place, la barre d'état en bas */
+body {
+  display: flex;
+  flex-direction: column;
+  background: #282c34;   /* même fond que oneDark : pas de flash blanc au démarrage */
+  color: #abb2bf;
+  font-family: system-ui, sans-serif;
+}
+
+#editor {
+  flex: 1;          /* prend tout l'espace restant */
+  min-height: 0;    /* sinon il refuse de rétrécir et le défilement casse */
+}
+
 #editor .cm-editor {
-  height: 100%;       /* la div ET l'éditeur prennent toute la hauteur */
+  height: 100%;
+}
+
+#statusbar {
+  display: flex;
+  gap: 16px;
+  padding: 3px 12px;
+  font-size: 12px;
+  background: #21252b;
+  border-top: 1px solid #181a1f;
+  user-select: none;   /* on ne sélectionne pas le texte de la barre par erreur */
+}
+
+#statusbar .spacer {
+  flex: 1;   /* pousse le langage, LF et UTF-8 à droite */
 }
